@@ -1,4 +1,4 @@
-package com.mx.centro.imei.repository;
+package com.mx.centro.imei.repository.escolaridad;
 
 import java.util.List;
 

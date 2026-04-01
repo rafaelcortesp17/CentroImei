@@ -2,6 +2,7 @@ import { Component, OnInit,inject,signal } from '@angular/core';
 import { EscolaridadService } from './services/escolaridad.service';
 import { Escolaridad } from './models/escolaridad.model';
 import { RouterOutlet } from '@angular/router';
+import { Auth } from './core/services/auth';
 
 @Component({
   selector: 'app-root',
@@ -12,15 +13,22 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App implements OnInit{
 
-  private service = inject(EscolaridadService);
-  public lista = signal<Escolaridad[]>([]);
+  constructor(private authService: Auth){
+
+  }
+
+  /* private service = inject(EscolaridadService);
+  public lista = signal<Escolaridad[]>([]); */
 
   ngOnInit(): void {
-    this.service.getEscolaridades().subscribe({
+    if(this.authService.isAuthenticated()){
+      this.authService.autoRefreshToken();
+    }
+    /* this.service.getEscolaridades().subscribe({
       next: (data) => {
         this.lista.set(data);// Actualizamos el signal
       },
       error: (err) => console.error('Error en fetch al obtener escolaridades:', err)
-    });
+    }); */
   }
 }
