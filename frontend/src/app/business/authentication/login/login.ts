@@ -3,10 +3,13 @@ import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ResetPass } from '../reset-pass/reset-pass';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule,CommonModule,MatDialogModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -16,7 +19,7 @@ export default class Login {
   password: string = '';
   role: string = '';
 
-  constructor(private auth: Auth, private router:Router){
+  constructor(private auth: Auth, private router:Router, public dialog: MatDialog, private snackBar: MatSnackBar){
   }
 
   login(): void{
@@ -34,6 +37,28 @@ export default class Login {
       },
       error: (err) => console.error('Login fallo',err)
     })
+  }
+
+  openRecoveryModal() {
+    const dialogRef = this.dialog.open(ResetPass, {
+    width: '500px', 
+    disableClose: true,
+    panelClass: 'custom-modal-container'
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.snackBar.open('¡Contraseña actualizada! Ya puedes iniciar sesión.', 'Entendido', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['success-snackbar'] // Opcional: para darle color verde en CSS
+      });
+      
+      this.user = '';
+      this.password = '';
+    }
+  });
   }
 
 }

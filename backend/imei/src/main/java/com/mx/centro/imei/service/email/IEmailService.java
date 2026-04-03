@@ -14,5 +14,8 @@ public interface IEmailService {
 	public RecoveryPass saveCode(RecoveryPass recovery);
 	
 	public Boolean validateRecoveryCode(String email, String code);
+	
+	public Boolean updatePassword(String correo, String password);
+	
 
 }

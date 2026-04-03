@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .csrf(crf -> crf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/mail/**").permitAll()
                 .anyRequest().authenticated()
                         )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

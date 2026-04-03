@@ -1,0 +1,72 @@
+<h2 mat-dialog-title class="font-bold text-xl">Recuperar Contraseña</h2>
+
+<mat-dialog-content>
+  <div class="flex flex-col gap-2 py-4">
+    
+    <div *ngIf="step === 1" class="flex flex-col animate-fade-in">
+      <p class="mb-4 text-gray-600">Introduce tu correo para enviarte un código de recuperación.</p>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput type="email" [(ngModel)]="email" placeholder="ejemplo@correo.com" name="email">
+        <mat-icon matSuffix>email</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div *ngIf="step === 2" class="flex flex-col animate-fade-in">
+      <p class="mb-4">Hemos enviado un código a <span class="font-semibold text-blue-700">{{ email }}</span></p>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Código de verificación</mat-label>
+        <input matInput type="text" [(ngModel)]="verificationCode" placeholder="000000" maxlength="6">
+        <mat-hint>Revisa tu bandeja de entrada o por defecto en spam</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div *ngIf="step === 3" class="flex flex-col gap-4 animate-fade-in">
+      <p class="text-sm text-gray-600">Escribe y confirma tu nueva contraseña.</p>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Nueva Contraseña</mat-label>
+        <input matInput 
+              [type]="hidePassword ? 'password' : 'text'" 
+              [(ngModel)]="newPassword" 
+              placeholder="Mínimo 8 caracteres">
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Confirmar Contraseña</mat-label>
+        <input matInput 
+              [type]="hidePassword ? 'password' : 'text'" 
+              [(ngModel)]="confirmPassword" 
+              placeholder="Repite tu contraseña">
+        <mat-icon matSuffix>lock_reset</mat-icon>
+        
+        <mat-error *ngIf="newPassword !== confirmPassword && confirmPassword.length > 0">
+          Las contraseñas no coinciden
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="pb-4 px-6">
+  <button mat-button (click)="closeModal()" class="mr-2">
+    Cancelar
+  </button>
+  
+  <button mat-raised-button 
+        color="primary" 
+        (click)="nextStep()" 
+        [disabled]="isLoading || (step === 1 && !email) || (step === 3 && isPasswordInvalid)"
+        class="relative min-w-[140px]">
+        <mat-spinner *ngIf="isLoading" diameter="24" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"></mat-spinner>
+        <span [class.opacity-0]="isLoading">
+          {{ step === 1 ? 'Enviar Código' : (step === 2 ? 'Validar Código' : 'Finalizar y Guardar') }}
+        </span>
+  </button>
+</mat-dialog-actions>

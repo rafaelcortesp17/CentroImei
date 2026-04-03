@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mx.centro.imei.models.entity.RecoveryPass;
+import com.mx.centro.imei.models.entity.UserModel;
 
 public interface ITokenRepositoryDao extends JpaRepository<RecoveryPass, Long>{
 	
@@ -23,5 +24,12 @@ public interface ITokenRepositoryDao extends JpaRepository<RecoveryPass, Long>{
     @Modifying
     @Query("DELETE FROM RecoveryPass r WHERE r.expiryDate < :fecha")
 	public int deleteAllExpiredSince(@Param("fecha") LocalDateTime fecha);
+	
+	public Optional<RecoveryPass> findByUser(UserModel user);
+	
+	@Transactional
+	@Modifying
+    @Query("DELETE FROM RecoveryPass r WHERE r.user.id = :userId")
+	public void deleteByUserId(@Param("userId") Long userId);
 
 }

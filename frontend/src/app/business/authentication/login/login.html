@@ -53,8 +53,12 @@
 					<div class="flex items-center justify-between">
 
 						<div class="text-sm ml-auto">
-							<a href="#" class="text-blue-700 hover:text-blue-600">
-							¿Olvidaste tu contraseña?
+							<a (click)="openRecoveryModal()" 
+								class="text-blue-700 hover:text-blue-600 cursor-pointer"
+								role="button"
+								tabindex="0"
+								(keydown.enter)="openRecoveryModal()">
+								¿Olvidaste tu contraseña?
 							</a>
 						</div>
 					</div>

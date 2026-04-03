@@ -16,7 +16,24 @@ export class Auth {
   private refreshTokenKey = 'refreshToken';
   private platformId = inject(PLATFORM_ID);
 
+  // URLs para recuperación de contraseña
+  private MAIL_URL = 'http://localhost:8080/api/v1/mail/send';
+  private VERIFY_CODE_URL = 'http://localhost:8080/api/v1/mail/verify-code';
+  private RESET_PASS_URL = 'http://localhost:8080/api/v1/mail/reset-password';
+
   constructor(private httpClient: HttpClient, private router: Router){}
+
+  sendRecoveryCode(correo: string): Observable<any> {
+    return this.httpClient.post<any>(this.MAIL_URL, { correo });
+  }
+
+  verifyCode(correo: string, code: string): Observable<any> {
+    return this.httpClient.post<any>(this.VERIFY_CODE_URL, { correo, code });
+  }
+
+  resetPassword(correo: string, password: string): Observable<any> {
+    return this.httpClient.put<any>(this.RESET_PASS_URL, { correo, password });
+  }
 
   login(user:string, password:string): Observable<any>{
     return this.httpClient.post<any>(this.LOGIN_URL,{user, password}).pipe(

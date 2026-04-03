@@ -12,7 +12,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mx.centro.imei.models.dao.ITokenRepositoryDao;
 import com.mx.centro.imei.exception.CustomMailException;
@@ -42,6 +44,9 @@ public class IEmailServiceImpl implements IEmailService{
 	
 	@Autowired
     private SecureRandom secureRandom;
+	
+	@Autowired
+    private PasswordEncoder passwordEncoder;
 
 	@Async
 //	@Retryable(
@@ -51,12 +56,12 @@ public class IEmailServiceImpl implements IEmailService{
 //	)
 	@Override
 	public void enviarCodigoRecuperacion(String destino, String codigo) {
-	  SimpleMailMessage message = new SimpleMailMessage();
-      message.setTo(destino);
-      message.setSubject("Código de Recuperación de Contraseña");
-      message.setText("Tu código de verificación es: " + codigo);
-      
-      mailSender.send(message);
+//	  SimpleMailMessage message = new SimpleMailMessage();
+//      message.setTo(destino);
+//      message.setSubject("Código de Recuperación de Contraseña");
+//      message.setText("Tu código de verificación es: " + codigo);
+//      
+//      mailSender.send(message);
       log.info("Correo enviado exitosamente a: {}", destino);
 	}
 	
@@ -96,8 +101,27 @@ public class IEmailServiceImpl implements IEmailService{
 	}
 
 	@Override
-	public RecoveryPass saveCode(RecoveryPass recovery) {
-		return iTokenRepositoryDao.save(recovery);
+	@Transactional
+	public RecoveryPass saveCode(RecoveryPass nuevoRecovery) {
+		try {
+	        Optional<RecoveryPass> existente = iTokenRepositoryDao.findByUser(nuevoRecovery.getUser());
+
+	        if (existente.isPresent()) {
+	            // Si existe, lo BORRAMOS en lugar de actualizarlo.
+	            // Esto evita el error de "Row was updated or deleted by another transaction"
+	            iTokenRepositoryDao.delete(existente.get());
+	            
+	            // Forzamos a que el borrado se ejecute en la BD de inmediato
+	            iTokenRepositoryDao.flush(); 
+	        }
+	    } catch (Exception e) {
+	        // Si el Cron lo borró un milisegundo antes, el catch atrapa el error 
+	        // y simplemente ignoramos, ya que el objetivo era que no existiera.
+	        System.out.println("El token ya había sido eliminado por el Cron o por otra transacción.");
+	    }
+	    nuevoRecovery.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+	    
+	    return iTokenRepositoryDao.save(nuevoRecovery);
 	}
 
 	@Override
@@ -108,12 +132,37 @@ public class IEmailServiceImpl implements IEmailService{
         }
 		RecoveryPass token = tokenVen.get();
 		
+		if (!token.getCodigo().equals(code)) {
+            return false; 
+        }
+		
 		if(token.isExpired()) {
 			iTokenRepositoryDao.delete(token);
 			return false;
 		}
 		
 		return true;
+	}
+
+	@Override
+	@Transactional
+	public Boolean updatePassword(String correo, String nuevaPassword) {
+		
+		// 1. Buscas al usuario por correo
+		Optional<UserModel> userOpt = Optional.ofNullable(iLoginUsuarioDao.findByEmail(correo));
+		if (userOpt.isPresent()) {
+			UserModel user = userOpt.get();
+	        // 2. Encriptas la nuevaPassword con BCryptPasswordEncoder
+			user.setPassword(passwordEncoder.encode(nuevaPassword));
+	    	System.out.println("Password encriptada: " + user.getPassword());
+	    	// 3. Actualiza pass
+			iLoginUsuarioDao.save(user);
+			// 4. LIMPIEZA: Borramos el rastro de RecoveryPass para este usuario
+	        // Así el código de 6 dígitos muere definitivamente
+			iTokenRepositoryDao.deleteByUserId(user.getId());
+			return true;
+		}
+		return false;
 	}
 	
 	
