@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.mx.centro.imei.entity.Escolaridad;
+import com.mx.centro.imei.models.entity.Escolaridad;
 import com.mx.centro.imei.service.escolaridad.interfaces.IEscolaridadService;
 
 @Controller

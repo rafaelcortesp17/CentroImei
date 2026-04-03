@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.mx.centro.imei.dto.AuthRequestDto;
-import com.mx.centro.imei.dto.AuthResponseDto;
-import com.mx.centro.imei.entity.UserModel;
+import com.mx.centro.imei.models.dto.AuthRequestDto;
+import com.mx.centro.imei.models.dto.AuthResponseDto;
+import com.mx.centro.imei.models.entity.UserModel;
 import com.mx.centro.imei.repository.user.UserRepository;
 import com.mx.centro.imei.service.jwt.JwtUtilService;
 
@@ -42,16 +42,21 @@ public class AuthController {
 
 		try {
 			//1. Gestion authenticationManager
+			System.out.println("auth RQ "+ authRequestDto.getUser() + " " + authRequestDto.getPassword());
 			this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
 	                authRequestDto.getUser(), authRequestDto.getPassword()
 	        ));
 			//2. Validar el usuario en la bd
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(authRequestDto.getUser());
-			UserModel userModel = this.userRepository.findByname(authRequestDto.getUser());
+//			UserModel userModel = this.userRepository.findByname(authRequestDto.getUser());
+			//nota al crear usuarios se debe definir como unicos(si no fallaria aqui)
+			UserModel userModelRol = this.userRepository.findByUsuarioConRol(authRequestDto.getUser());
+			System.out.println("rol de usuario prueba atraves del jpa: "+ userModelRol.getRol().getNombre());
+			System.out.println("estatus: "+ userModelRol.getEstatus());
 			
 			//3. Generar token
-			String jwt = this.jwtUtilService.generateToken(userDetails,userModel.getRole());
-			String refreshToken = this.jwtUtilService.generateRefreshToken(userDetails,userModel.getRole());
+			String jwt = this.jwtUtilService.generateToken(userDetails,userModelRol.getRol().getNombre());
+			String refreshToken = this.jwtUtilService.generateRefreshToken(userDetails,userModelRol.getRol().getNombre());
 			
 			AuthResponseDto authResponseDto = new AuthResponseDto();
             authResponseDto.setToken(jwt);
@@ -73,11 +78,13 @@ public class AuthController {
 			
 			String username = this.jwtUtilService.extractUsername(refreshToken);
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-			UserModel userModel = this.userRepository.findByname(username);
+			//UserModel userModel = this.userRepository.findByname(username);
+			//nota al crear usuarios se debe definir como unicos(si no fallaria aqui)
+			UserModel userModelRol = this.userRepository.findByUsuarioConRol(username);
 			
 			if(this.jwtUtilService.validateToken(refreshToken, userDetails)) {
-				String newJwt = this.jwtUtilService.generateToken(userDetails, userModel.getRole());
-				String newRefreshToken = this.jwtUtilService.generateRefreshToken(userDetails, userModel.getRole());
+				String newJwt = this.jwtUtilService.generateToken(userDetails, userModelRol.getRol().getNombre());
+				String newRefreshToken = this.jwtUtilService.generateRefreshToken(userDetails, userModelRol.getRol().getNombre());
 				
 				AuthResponseDto authResponseDto = new AuthResponseDto();
 				authResponseDto.setToken(newJwt);

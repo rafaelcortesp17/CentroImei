@@ -2,7 +2,7 @@ package com.mx.centro.imei.service.escolaridad.interfaces;
 
 import java.util.List;
 
-import com.mx.centro.imei.entity.Escolaridad;
+import com.mx.centro.imei.models.entity.Escolaridad;
 
 public interface IEscolaridadService {
 	

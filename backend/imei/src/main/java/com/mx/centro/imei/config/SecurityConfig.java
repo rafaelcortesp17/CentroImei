@@ -2,6 +2,8 @@ package com.mx.centro.imei.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import java.security.SecureRandom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.mx.centro.imei.filter.JwtRequestFilter;
+import com.mx.centro.imei.models.filter.JwtRequestFilter;
 
 
 @Configuration
@@ -47,6 +49,11 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return  authenticationConfiguration.getAuthenticationManager();
+    }
+    
+    @Bean
+    public SecureRandom secureRandom() {
+        return new SecureRandom(); // Utiliza el algoritmo más seguro del SO
     }
 
 }

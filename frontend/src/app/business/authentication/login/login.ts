@@ -25,6 +25,7 @@ export default class Login {
         const token = response.token;
         const payload = JSON.parse(atob(token.split('.')[1]));
         this.role = payload.role;
+        console.log("Rol: " + this.role);
         if(this.role == 'admin'){
           this.router.navigate(['/dashboard'])
         }else if(this.role == 'student'){

@@ -1,4 +1,4 @@
-package com.mx.centro.imei.dto;
+package com.mx.centro.imei.models.dto;
 
 import lombok.Getter;
 import lombok.Setter;

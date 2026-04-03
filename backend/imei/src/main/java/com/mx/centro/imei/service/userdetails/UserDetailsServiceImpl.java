@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.mx.centro.imei.entity.UserModel;
+import com.mx.centro.imei.models.entity.UserModel;
 import com.mx.centro.imei.repository.user.UserRepository;
 
 @Service

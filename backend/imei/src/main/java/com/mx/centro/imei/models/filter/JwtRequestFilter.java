@@ -1,4 +1,4 @@
-package com.mx.centro.imei.filter;
+package com.mx.centro.imei.models.filter;
 
 import java.io.IOException;
 
