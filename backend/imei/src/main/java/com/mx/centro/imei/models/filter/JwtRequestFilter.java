@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.mx.centro.imei.service.jwt.JwtUtilService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,26 +29,43 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 	private JwtUtilService jwtUtilService;
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)throws ServletException, IOException {
-		final String authorizationHeader = request.getHeader("Authorization");
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        
+        final String authorizationHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String jwt = authorizationHeader.substring(7);
-            String username = jwtUtilService.extractUsername(jwt);
+        String username = null;
+        String jwt = null;
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        // 1. Intentamos extraer la información del token de forma segura
+        try {
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                jwt = authorizationHeader.substring(7);
+                username = jwtUtilService.extractUsername(jwt);
+            }
+        } catch (ExpiredJwtException e) {
+            // Si el token expiró, simplemente logeamos y dejamos que username sea null
+            logger.warn("JWT expirado: " + e.getMessage());
+        } catch (Exception e) {
+            // Cualquier otro error de parseo (token malformado, etc.)
+            logger.error("Error al procesar el token JWT: " + e.getMessage());
+        }
 
-                if (jwtUtilService.validateToken(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
+        // 2. Si logramos obtener el username y no hay autenticación previa
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+            if (jwtUtilService.validateToken(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
+
+        // 3. ¡Vital! Siempre ejecutar el filterChain para que la petición continúe
+        // hacia los endpoints (sean públicos o privados)
         filterChain.doFilter(request, response);
-		
-	}
+    }
 
 }

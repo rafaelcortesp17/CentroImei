@@ -49,19 +49,19 @@ public class IEmailServiceImpl implements IEmailService{
     private PasswordEncoder passwordEncoder;
 
 	@Async
-//	@Retryable(
-//	    value = { MailException.class }, 
-//	    maxAttempts = 3, 
-//	    backoff = @Backoff(delay = 2000, multiplier = 2)
-//	)
+	@Retryable(
+	    value = { MailException.class }, 
+	    maxAttempts = 3, 
+	    backoff = @Backoff(delay = 2000, multiplier = 2)
+	)
 	@Override
 	public void enviarCodigoRecuperacion(String destino, String codigo) {
-//	  SimpleMailMessage message = new SimpleMailMessage();
-//      message.setTo(destino);
-//      message.setSubject("Código de Recuperación de Contraseña");
-//      message.setText("Tu código de verificación es: " + codigo);
-//      
-//      mailSender.send(message);
+	  SimpleMailMessage message = new SimpleMailMessage();
+      message.setTo(destino);
+      message.setSubject("Código de Recuperación de Contraseña");
+      message.setText("Tu código de verificación es: " + codigo);
+      
+      mailSender.send(message);
       log.info("Correo enviado exitosamente a: {}", destino);
 	}
 	
