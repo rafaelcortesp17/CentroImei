@@ -23,20 +23,52 @@ export default class Login {
   }
 
   login(): void{
+    // Regex: Usuario (letras/números 4-12), Password (min 8, 1 letra, 1 número)
+    const userRegex = /^[a-zA-Z0-9]{4,16}$/;
+    const passRegex = /^[a-zA-Z0-9@$!%*?&._-]{8,25}$/;
+
+    if (!userRegex.test(this.user)) {
+      this.releaseStatement('El usuario debe ser alfanumérico (4-12 caracteres)', 'error-snackbar');
+      return;
+    }
+
+    if (!passRegex.test(this.password)) {
+      this.releaseStatement('La contraseña requiere min. 8 caracteres, letras y números', 'error-snackbar');
+      return;
+    }
+
     this.auth.login(this.user,this.password).subscribe({
       next: (response) =>{
-        const token = response.token;
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        this.role = payload.role;
-        console.log("Rol: " + this.role);
-        if(this.role == 'admin'){
-          this.router.navigate(['/dashboard'])
-        }else if(this.role == 'student'){
-          this.router.navigate(['/profile'])
-        }
+        const roles: string[] = response.roles;
+        console.log("Roles recibidos:", roles);
+        this.releaseStatement('¡Bienvenido '+ this.user +'!', 'success-snackbar');
+        this.router.navigate(['/dashboard']);
       },
-      error: (err) => console.error('Login fallo',err)
-    })
+        error: (err) => {
+        console.error('Login falló', err);
+
+      // Si el back mandó .body("Error Authetication:::..."), viene en err.error
+      let mensajeError = 'Ocurrió un error inesperado';
+
+      console.error('Estatus error', err.status);
+      if (err.status === 401) {
+        mensajeError = 'Usuario o contraseña incorrectos';
+      } else if (err.status === 403) {
+        mensajeError = 'No tienes permiso para acceder';
+      } else if (err.status === 0) {
+        mensajeError = 'No hay conexión con el servidor';
+      } else if (typeof err.error === 'string') {
+        mensajeError = err.error;
+      }
+      console.error(mensajeError);
+        this.snackBar.open(mensajeError, 'Entendido', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
   }
 
   openRecoveryModal() {
@@ -52,13 +84,21 @@ export default class Login {
         duration: 5000,
         horizontalPosition: 'center',
         verticalPosition: 'top',
-        panelClass: ['success-snackbar'] // Opcional: para darle color verde en CSS
+        panelClass: ['success-snackbar']
       });
       
       this.user = '';
       this.password = '';
     }
   });
+  }
+
+  releaseStatement(mensaje: string, clase: string) {
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 4000,
+      verticalPosition: 'top',
+      panelClass: [clase]
+    });
   }
 
 }

@@ -1,14 +1,16 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component} from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import Login from '../../../business/authentication/login/login';
+import { CommonModule } from '@angular/common';
+import { Auth } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink,RouterLinkActive],
+  imports: [RouterLink,RouterLinkActive,CommonModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
 export class Sidebar {
-  @Input()
-  permission: String = '';
+  
+  constructor(public auth: Auth) {}
+  
 }

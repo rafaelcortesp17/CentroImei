@@ -36,6 +36,50 @@ body {
   margin: 0;
   height: 100%;
 }
+
+//snack bar en error
+.error-snackbar {
+  --mdc-snackbar-container-color: #c62828; /* Rojo vibrante */
+  --mdc-snackbar-supporting-text-color: #ffffff; /* Texto blanco */
+  
+  /* Contenedor de la superficie para asegurar el fondo */
+  .mdc-snackbar__surface {
+    background-color: #c62828 !important;
+  }
+
+  /* Estilo para el botón de acción (Cerrar / Entendido) */
+  .mat-mdc-snack-bar-action button {
+    // Usamos blanco para un contraste limpio
+    --mdc-snack-bar-button-label-text-color: #ffffff !important;
+    font-weight: 700 !important; /* Negrita para que se note que es un botón */
+    text-transform: uppercase;   /* Estilo clásico de Material */
+    letter-spacing: 0.5px;
+  }
+  .mat-mdc-snack-bar-action button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Un ligero brillo al pasar el mouse */
+    border-radius: 4px;
+  }
+}
+
+//snack bar en exito
+.mat-mdc-snack-bar-container.success-snackbar {
+  --mdc-snackbar-container-color: #2e7d32 !important;
+  --mat-snack-bar-button-color: #ffffff !important;
+  
+  .mdc-snackbar__surface {
+    background-color: #2e7d32 !important;
+  }
+
+  .mdc-snackbar__label {
+    color: #ffffff !important;
+  }
+
+  /* El botón "Entendido" */
+  .mat-mdc-snack-bar-action button {
+    color: #ffffff !important;
+    --mdc-snack-bar-button-label-text-color: #ffffff !important;
+  }
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

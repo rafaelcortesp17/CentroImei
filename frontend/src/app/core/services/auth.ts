@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, tap, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -9,6 +9,8 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root',
 })
 export class Auth {
+
+  private rolesKey = 'userRoles';
 
   private LOGIN_URL = 'http://localhost:8080/api/v1/auth/login';
   private tokenKey = 'authToken';
@@ -20,6 +22,9 @@ export class Auth {
   private MAIL_URL = 'http://localhost:8080/api/v1/mail/send';
   private VERIFY_CODE_URL = 'http://localhost:8080/api/v1/mail/verify-code';
   private RESET_PASS_URL = 'http://localhost:8080/api/v1/mail/reset-password';
+
+  //Urls para el perfil general
+  private PERFIL_GENERAL_URL = 'http://localhost:8080/api/v1/home/perfil-general';
 
   constructor(private httpClient: HttpClient, private router: Router){}
 
@@ -42,10 +47,34 @@ export class Auth {
           console.log(response.token);
           this.setToken(response.token);
           this.setRefreshToken(response.refreshToken);
+
+          if(response.roles){
+            this.setRoles(response.roles);
+          }
+
           this.autoRefreshToken();
         }
+      }),
+      catchError(error => {
+        // Aquí puedes loguear el error o transformarlo
+        console.error("Error capturado en el servicio:", error);
+        return throwError(() => error); 
       })
     )
+  }
+
+  private setRoles(roles: string[]): void {
+    localStorage.setItem(this.rolesKey, JSON.stringify(roles));
+  }
+
+  public getRoles(): string[] {
+    if (!isPlatformBrowser(this.platformId)) return [];
+    const roles = localStorage.getItem(this.rolesKey);
+    return roles ? JSON.parse(roles) : [];
+  }
+
+  public hasRole(role: string): boolean {
+    return this.getRoles().includes(role);
   }
 
   private setToken(token: string): void{
@@ -101,17 +130,6 @@ export class Auth {
     }
   }
 
-
-  /* isAuthenticated(): boolean{
-    const token = this.getToken();
-    if(!token){
-      return false;
-    }
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp * 1000;
-    return Date.now() < exp;
-  } */
-
   isAuthenticated(): boolean {
     // 1. Si NO es el navegador, no podemos saber si está logueado (retornamos false)
     if (!isPlatformBrowser(this.platformId)) {
@@ -129,9 +147,20 @@ export class Auth {
     }
   }
 
+  getProfileInfo(username: string): Observable<any>{
+    return this.httpClient.post<any>(this.PERFIL_GENERAL_URL,{username}).pipe(
+      tap(response => {
+        if(response){
+          console.log(response);
+        }
+      })
+    )
+  }
+
   logout():void{
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.rolesKey);
     this.router.navigate(['/login']);
   }
 

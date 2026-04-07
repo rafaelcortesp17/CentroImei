@@ -1,5 +1,6 @@
 package com.mx.centro.imei.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +49,10 @@ public class AuthController {
 	        ));
 			//2. Validar el usuario en la bd
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(authRequestDto.getUser());
-//			UserModel userModel = this.userRepository.findByname(authRequestDto.getUser());
+			//UserModel userModel = this.userRepository.findByname(authRequestDto.getUser());
 			//nota al crear usuarios se debe definir como unicos(si no fallaria aqui)
 			UserModel userModelRol = this.userRepository.findByUsuarioConRol(authRequestDto.getUser());
+			
 			System.out.println("rol de usuario prueba atraves del jpa: "+ userModelRol.getRol().getNombre());
 			System.out.println("estatus: "+ userModelRol.getEstatus());
 			
@@ -61,6 +63,10 @@ public class AuthController {
 			AuthResponseDto authResponseDto = new AuthResponseDto();
             authResponseDto.setToken(jwt);
             authResponseDto.setRefreshToken(refreshToken);
+            authResponseDto.setUsername(authRequestDto.getUser());
+            
+            String nombreRol = userModelRol.getRol().getNombre();
+            authResponseDto.setRoles(List.of("ROLE_" + nombreRol));
 			
 			return new ResponseEntity<AuthResponseDto>(authResponseDto, HttpStatus.OK);
 		
@@ -89,6 +95,8 @@ public class AuthController {
 				AuthResponseDto authResponseDto = new AuthResponseDto();
 				authResponseDto.setToken(newJwt);
 				authResponseDto.setRefreshToken(newRefreshToken);
+				authResponseDto.setUsername(username);
+				authResponseDto.setRoles(List.of("ROLE_" + userModelRol.getRol().getNombre()));
 				return new ResponseEntity<>(authResponseDto, HttpStatus.OK);
 			}else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Refresh Token");

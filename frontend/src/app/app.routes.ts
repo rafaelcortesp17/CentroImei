@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth-guard';
 import { AuthenticatedGuard } from './core/guards/authenticated-guard';
+import { roleGuard } from './core/guards/role-guard';
 
 export const routes: Routes = [
     {
@@ -13,14 +14,58 @@ export const routes: Routes = [
                 canActivate: [AuthGuard]
             },
             {
-                path:'profile',
-                loadComponent: () => import('./business/profile/profile'),
-                canActivate: [AuthGuard]
+                path:'reportes-sep',
+                loadComponent: () => import('./business/administrativa/reportes-sep/reportes-sep'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_ADMIN' }
             },
             {
-                path:'tables',
-                loadComponent: () => import('./business/tables/tables'),
-                canActivate: [AuthGuard]
+                path:'kardex',
+                loadComponent: () => import('./business/administrativa/kardex/kardex'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_ADMIN' }
+            },
+            {
+                path:'control-grupos',
+                loadComponent: () => import('./business/administrativa/control-grupos/control-grupos'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_ADMIN' }
+            },
+            {
+                path:'inscripciones',
+                loadComponent: () => import('./business/administrativa/inscripciones/inscripciones'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_ADMIN' }
+            },
+            {
+                path:'planeacion-didactica',
+                loadComponent: () => import('./business/docencia/planeacion-didactica/planeacion-didactica'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_TEACHER' }
+            },
+            {
+                path:'carga-contenido',
+                loadComponent: () => import('./business/docencia/carga-contenido/carga-contenido'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_TEACHER' }
+            },
+            {
+                path:'materias',
+                loadComponent: () => import('./business/estudiantil/materias/materias'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_STUDENT' }
+            },
+            {
+                path:'contenidos',
+                loadComponent: () => import('./business/estudiantil/contenidos/contenidos'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_STUDENT' }
+            },
+            {
+                path:'actividades',
+                loadComponent: () => import('./business/estudiantil/actividades/actividades'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_STUDENT' }
             },
             {
                 path:'',
