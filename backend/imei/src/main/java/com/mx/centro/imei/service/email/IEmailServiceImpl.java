@@ -107,12 +107,7 @@ public class IEmailServiceImpl implements IEmailService{
 	        Optional<RecoveryPass> existente = iTokenRepositoryDao.findByUser(nuevoRecovery.getUser());
 
 	        if (existente.isPresent()) {
-	            // Si existe, lo BORRAMOS en lugar de actualizarlo.
-	            // Esto evita el error de "Row was updated or deleted by another transaction"
-	            iTokenRepositoryDao.delete(existente.get());
-	            
-	            // Forzamos a que el borrado se ejecute en la BD de inmediato
-	            iTokenRepositoryDao.flush(); 
+	        	iTokenRepositoryDao.deleteByUserId(nuevoRecovery.getUser().getId());
 	        }
 	    } catch (Exception e) {
 	        // Si el Cron lo borró un milisegundo antes, el catch atrapa el error 
@@ -137,7 +132,7 @@ public class IEmailServiceImpl implements IEmailService{
         }
 		
 		if(token.isExpired()) {
-			iTokenRepositoryDao.delete(token);
+			iTokenRepositoryDao.deleteByUserId(token.getUser().getId());
 			return false;
 		}
 		

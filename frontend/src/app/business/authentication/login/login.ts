@@ -47,26 +47,21 @@ export default class Login {
         error: (err) => {
         console.error('Login falló', err);
 
-      // Si el back mandó .body("Error Authetication:::..."), viene en err.error
-      let mensajeError = 'Ocurrió un error inesperado';
+        // Si el back mandó .body("Error Authetication:::..."), viene en err.error
+        let mensajeError = 'Ocurrió un error inesperado';
 
-      console.error('Estatus error', err.status);
-      if (err.status === 401) {
-        mensajeError = 'Usuario o contraseña incorrectos';
-      } else if (err.status === 403) {
-        mensajeError = 'No tienes permiso para acceder';
-      } else if (err.status === 0) {
-        mensajeError = 'No hay conexión con el servidor';
-      } else if (typeof err.error === 'string') {
-        mensajeError = err.error;
-      }
-      console.error(mensajeError);
-        this.snackBar.open(mensajeError, 'Entendido', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        console.error('Estatus error', err.status);
+        if (err.status === 401) {
+          mensajeError = 'Usuario o contraseña incorrectos';
+        } else if (err.status === 403) {
+          mensajeError = 'No tienes permiso para acceder';
+        } else if (err.status === 0) {
+          mensajeError = 'No hay conexión con el servidor';
+        } else if (typeof err.error === 'string') {
+          mensajeError = err.error;
+        }
+        console.error(mensajeError);
+        this.releaseStatement(mensajeError,'error-snackbar');
       }
     });
   }
@@ -78,24 +73,23 @@ export default class Login {
     panelClass: 'custom-modal-container'
   });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result === true) {
-      this.snackBar.open('¡Contraseña actualizada! Ya puedes iniciar sesión.', 'Entendido', {
-        duration: 5000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass: ['success-snackbar']
-      });
-      
-      this.user = '';
-      this.password = '';
-    }
-  });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.success) {
+        this.releaseStatement(result.message,'success-snackbar');
+        
+        setTimeout(() => {
+          this.user = '';
+          this.password = '';
+        });
+      }else if(result.success === false){
+        this.releaseStatement(result.message,'error-snackbar');
+      }
+    });
   }
 
   releaseStatement(mensaje: string, clase: string) {
-    this.snackBar.open(mensaje, 'Cerrar', {
-      duration: 4000,
+    this.snackBar.open(mensaje, 'Entendido', {
+      duration: 5000,
       verticalPosition: 'top',
       panelClass: [clase]
     });

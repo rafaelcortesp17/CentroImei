@@ -38,8 +38,32 @@ export class ResetPass {
   // Inyectamos la referencia del modal para poder cerrarlo
   constructor(private auth: Auth,public dialogRef: MatDialogRef<ResetPass>,private cdr: ChangeDetectorRef) {}
 
+  // Define el estado de los requisitos
+  passwordRequirements = {
+    length: false,
+    upper: false,
+    lower: false,
+    number: false,
+    special: false
+  };
+
+  checkPassword() {
+    const p = this.newPassword || '';
+    this.passwordRequirements = {
+      length: p.length >= 8 && p.length <= 64,
+      upper: /[A-Z]/.test(p),
+      lower: /[a-z]/.test(p),
+      number: /\d/.test(p),
+      special: /[@$!%*?&._-]/.test(p)
+    };
+  }
+
   get isPasswordInvalid(): boolean {
-    return this.newPassword.length < 8 || this.newPassword !== this.confirmPassword;
+    const req = this.passwordRequirements;
+    const match = this.newPassword === this.confirmPassword;
+    
+    // Es inválido si falta algún requisito o las claves no coinciden
+    return !(req.length && req.upper && req.lower && req.number && req.special && match);
   }
 
   nextStep() {
@@ -59,7 +83,7 @@ export class ResetPass {
           this.isLoading = false;
           console.error('Error en el servicio:', err);
           // Aquí se captura el HttpStatus.CONFLICT o el 500 de Java
-          alert('Error: ' + (err.error || 'No se pudo enviar el correo'));
+          this.dialogRef.close({success: false, message: (err.error || 'No se pudo enviar el correo')});
         }
       });
     } else if (this.step === 2) {
@@ -71,24 +95,20 @@ export class ResetPass {
           this.isLoading = false;
           if (isValid) {
             this.step = 3; // Si el código coincide, vamos a las contraseñas
-          } else {
-            alert('El código es incorrecto o ya expiró. Intenta de nuevo.');
           }
+          //obliga a actualizar el dom(refrescar la vista)
           this.cdr.detectChanges();
         },
         error: (err) => {
           this.isLoading = false;
           this.cdr.detectChanges();
-          alert('Error al validar: ' + (err.error || 'Servidor no disponible'));
+          this.dialogRef.close({success: false, message: (err.error || 'Servidor no disponible')});
         }
       });
     }else if (this.step === 3) {
       // Verificación de seguridad extra antes de disparar la petición
       if (this.isPasswordInvalid) return;
-
       this.isLoading = true;
-      console.log('Actualizando contraseña para:', this.email);
-      console.log('Cambiando contraseña a:', this.newPassword);
 
       this.auth.resetPassword(this.email, this.newPassword).subscribe({
         next: (response) => {
@@ -96,14 +116,13 @@ export class ResetPass {
           console.log('Contraseña actualizada!', response);
           
           // Cerramos el modal y mandamos un mensaje de éxito
-          alert('¡Tu contraseña ha sido actualizada con éxito!');
-          this.dialogRef.close(true); // Retornamos true por si quieres hacer algo en el login
+          this.dialogRef.close({success: true, message: '¡Contraseña actualizada! Ya puedes iniciar sesión.'});
         },
         error: (err) => {
           this.isLoading = false;
           this.cdr.detectChanges();
           console.error('Error al actualizar:', err);
-          alert('Error: ' + (err.error?.message || 'No se pudo actualizar la contraseña. Intenta más tarde.'));
+          this.dialogRef.close({success: false, message: (err.error?.message || 'No se pudo actualizar la contraseña. Intenta más tarde.')});
         }
       });
     }

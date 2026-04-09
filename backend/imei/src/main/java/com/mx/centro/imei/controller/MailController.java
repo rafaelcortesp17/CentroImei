@@ -1,6 +1,5 @@
 package com.mx.centro.imei.controller;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,8 @@ public class MailController {
 			return new ResponseEntity<>("No se pudo procesar la solicitud", HttpStatus.CONFLICT);
 			
 		}catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error Send Email:::" + e.getMessage());
+			System.out.println("Error Send Email:::" + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al enviar código por email, esperar a que se restablezca el servicio");
 		}
 	}
 	
@@ -65,11 +65,13 @@ public class MailController {
 	            return new ResponseEntity<>(true, HttpStatus.OK);
 	        } else {
 	            // Si el código expiró o está mal, mandamos un error 401 o 400
+	        	System.out.println("Código inválido o expirado. Favor de reenviar el código por email");
 	            return new ResponseEntity<>("Código inválido o expirado. Favor de reenviar el código por email", HttpStatus.UNAUTHORIZED);
 	        }
 	    } catch (Exception e) {
+	    	System.out.println("Error al validar código: " + e.getMessage());
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                             .body("Error al validar código: " + e.getMessage());
+	                             .body("Error al validar código: Si el Problema persiste contacte al Administrador" );
 	    }
 	    
 	  //valida que no haya expirado el codigo(tiene vigencia de 10 mins)
@@ -93,8 +95,9 @@ public class MailController {
 	                    .body(Map.of("No se pudo actualizar el Password. No se encontró el usuario asociado a este correo", HttpStatus.CONFLICT));
 	    	}
 	    } catch (Exception e) {
+	    	System.out.println("Error interno: " + e.getMessage());
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error interno: " + e.getMessage()));
+                    .body(Map.of("message", "Error interno: Intentar nuevamente en un momento, si el error persiste, favor de contactar a un Administrador"));
 	    }
 	}
 
