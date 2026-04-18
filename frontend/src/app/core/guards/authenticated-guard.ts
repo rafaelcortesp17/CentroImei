@@ -12,7 +12,7 @@ export const AuthenticatedGuard: CanActivateFn = (route, state) => {
 
   // Si ya está logueado, lo regresamos al dashboard
   if(auth.isAuthenticated()){
-    return router.parseUrl('/dashboard');
+    return router.parseUrl('/platform/dashboard');
   }else{
     return true;
   }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ResetPass } from '../reset-pass/reset-pass';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { LoginService } from '../../../core/services/authentication/login/login-service';
 
 @Component({
   selector: 'app-login',
@@ -15,20 +16,28 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export default class Login {
 
-  user: string = '';
+  email: string = '';
   password: string = '';
   role: string = '';
 
-  constructor(private auth: Auth, private router:Router, public dialog: MatDialog, private snackBar: MatSnackBar){
+  showPassword = signal(false);
+
+  constructor(private auth: Auth, private router:Router, 
+              public dialog: MatDialog, private snackBar: MatSnackBar,
+              private loginService: LoginService){}
+
+  togglePassword() {
+    // Cambia de true a false y viceversa
+    this.showPassword.update(prev => !prev);
   }
 
   login(): void{
-    // Regex: Usuario (letras/números 4-12), Password (min 8, 1 letra, 1 número)
-    const userRegex = /^[a-zA-Z0-9]{4,16}$/;
+    // Regex: Usuario (correo valido), Password (min 8, 1 letra, 1 número)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const passRegex = /^[a-zA-Z0-9@$!%*?&._-]{8,25}$/;
 
-    if (!userRegex.test(this.user)) {
-      this.releaseStatement('El usuario debe ser alfanumérico (4-12 caracteres)', 'error-snackbar');
+    if (!emailRegex.test(this.email)) {
+      this.releaseStatement('El usuario debe ser un correo valido', 'error-snackbar');
       return;
     }
 
@@ -37,12 +46,15 @@ export default class Login {
       return;
     }
 
-    this.auth.login(this.user,this.password).subscribe({
+    this.auth.login(this.email,this.password).subscribe({
       next: (response) =>{
+        const nombreUsuario = response.nombreUsuario;
         const roles: string[] = response.roles;
+        const emailUser = response.email;
+        this.setParamsUser(emailUser,nombreUsuario,roles);
         console.log("Roles recibidos:", roles);
-        this.releaseStatement('¡Bienvenido '+ this.user +'!', 'success-snackbar');
-        this.router.navigate(['/dashboard']);
+        this.releaseStatement('¡Bienvenido '+ nombreUsuario +'!', 'success-snackbar');
+        this.router.navigate(['/platform/dashboard']);
       },
         error: (err) => {
         console.error('Login falló', err);
@@ -78,7 +90,7 @@ export default class Login {
         this.releaseStatement(result.message,'success-snackbar');
         
         setTimeout(() => {
-          this.user = '';
+          this.email = '';
           this.password = '';
         });
       }else if(result.success === false){
@@ -93,6 +105,12 @@ export default class Login {
       verticalPosition: 'top',
       panelClass: [clase]
     });
+  }
+
+  setParamsUser(emailUser:string,username:string,roles:string[]){
+    console.log("Email User: " + emailUser);
+    console.log("User: " + emailUser);
+    this.loginService.setSession(emailUser,username,roles);
   }
 
 }

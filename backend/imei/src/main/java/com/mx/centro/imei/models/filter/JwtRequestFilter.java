@@ -27,6 +27,15 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 	
 	@Autowired
 	private JwtUtilService jwtUtilService;
+	
+	@Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/v1/auth/") ||
+               path.startsWith("/api/v1/mail/") ||
+               path.startsWith("/api/v1/commons/") ||
+               path.startsWith("/api/v1/webhooks/stripe/");
+    }
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

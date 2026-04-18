@@ -5,7 +5,7 @@ import com.mx.centro.imei.models.entity.UserModel;
 
 public interface IEmailService {
 	
-	public void enviarCodigoRecuperacion(String correo, String codigo);
+	public void enviarCodigoRecuperacion(String correo, String codigo, String tipo);
 	
 	public UserModel validateIsExistMail(String correo);
 	
@@ -17,5 +17,6 @@ public interface IEmailService {
 	
 	public Boolean updatePassword(String correo, String password);
 	
+	public void sendActivationEmail(String email, String activationUrl,String tipo);
 
 }

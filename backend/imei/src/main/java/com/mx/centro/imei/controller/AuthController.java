@@ -43,17 +43,17 @@ public class AuthController {
 
 		try {
 			//1. Gestion authenticationManager
-			System.out.println("auth RQ "+ authRequestDto.getUser() + " " + authRequestDto.getPassword());
+			System.out.println("auth RQ "+ authRequestDto.getEmail() + " " + authRequestDto.getPassword());
 			this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-	                authRequestDto.getUser(), authRequestDto.getPassword()
+	                authRequestDto.getEmail(), authRequestDto.getPassword()
 	        ));
 			//2. Validar el usuario en la bd
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(authRequestDto.getUser());
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(authRequestDto.getEmail());
 			//UserModel userModel = this.userRepository.findByname(authRequestDto.getUser());
 			//nota al crear usuarios se debe definir como unicos(si no fallaria aqui)
-			UserModel userModelRol = this.userRepository.findByUsuarioConRol(authRequestDto.getUser());
+			UserModel userModelRol = this.userRepository.findByEmailConRol(authRequestDto.getEmail());
 			
-			System.out.println("rol de usuario prueba atraves del jpa: "+ userModelRol.getRol().getNombre());
+			System.out.println("Nombre del usuario prueba atraves del jpa: "+ userModelRol.getPersonas().getNombre().concat(" ").concat(userModelRol.getPersonas().getApellidoPaterno()));
 			System.out.println("estatus: "+ userModelRol.getEstatus());
 			
 			//3. Generar token
@@ -63,7 +63,8 @@ public class AuthController {
 			AuthResponseDto authResponseDto = new AuthResponseDto();
             authResponseDto.setToken(jwt);
             authResponseDto.setRefreshToken(refreshToken);
-            authResponseDto.setUsername(authRequestDto.getUser());
+            authResponseDto.setEmail(authRequestDto.getEmail());
+            authResponseDto.setNombreUsuario(userModelRol.getPersonas().getNombre().concat(" ").concat(userModelRol.getPersonas().getApellidoPaterno()));
             
             String nombreRol = userModelRol.getRol().getNombre();
             authResponseDto.setRoles(List.of("ROLE_" + nombreRol));
@@ -82,11 +83,11 @@ public class AuthController {
 
 		try {
 			
-			String username = this.jwtUtilService.extractUsername(refreshToken);
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+			String email = this.jwtUtilService.extractUsername(refreshToken);
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 			//UserModel userModel = this.userRepository.findByname(username);
 			//nota al crear usuarios se debe definir como unicos(si no fallaria aqui)
-			UserModel userModelRol = this.userRepository.findByUsuarioConRol(username);
+			UserModel userModelRol = this.userRepository.findByEmailConRol(email);
 			
 			if(this.jwtUtilService.validateToken(refreshToken, userDetails)) {
 				String newJwt = this.jwtUtilService.generateToken(userDetails, userModelRol.getRol().getNombre());
@@ -95,7 +96,8 @@ public class AuthController {
 				AuthResponseDto authResponseDto = new AuthResponseDto();
 				authResponseDto.setToken(newJwt);
 				authResponseDto.setRefreshToken(newRefreshToken);
-				authResponseDto.setUsername(username);
+				authResponseDto.setEmail(email);
+				authResponseDto.setNombreUsuario(userModelRol.getPersonas().getNombre().concat(" ").concat(userModelRol.getPersonas().getApellidoPaterno()));
 				authResponseDto.setRoles(List.of("ROLE_" + userModelRol.getRol().getNombre()));
 				return new ResponseEntity<>(authResponseDto, HttpStatus.OK);
 			}else {

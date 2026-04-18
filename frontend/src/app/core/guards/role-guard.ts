@@ -18,6 +18,6 @@ export const roleGuard: CanActivateFn = (route, state) => {
   }
 
   console.warn(`Acceso denegado: Se requiere el rol ${expectedRole}`);
-  router.navigate(['/dashboard']); 
+  router.navigate(['/platform/dashboard']); 
   return false;
 };

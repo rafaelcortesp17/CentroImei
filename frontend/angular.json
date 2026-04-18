@@ -40,6 +40,9 @@
             },
             "ssr": {
               "entry": "src/server.ts"
+            },
+            "stylePreprocessorOptions": {
+              "includePaths": ["src"]
             }
           },
           "configurations": {
@@ -76,7 +79,11 @@
               "buildTarget": "frontend:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "host": "0.0.0.0",
+            "allowedHosts": ["localhost","192.168.1.83"]
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"

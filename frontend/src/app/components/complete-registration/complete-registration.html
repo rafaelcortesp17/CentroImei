@@ -1,0 +1,145 @@
+<div class="registration-container">
+  
+  @if (loading()) {
+    <mat-spinner diameter="50"></mat-spinner>
+  } @else {
+    
+    @if (isValidToken()) {
+      <mat-card class="registration-card">
+        
+        <mat-card-header>
+          <div mat-card-avatar class="header-image"></div>
+          <mat-card-title>Configura tu acceso</mat-card-title>
+          <mat-card-subtitle>CENTRO DE ENLACE IMEI PIRÁMIDE</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <mat-stepper #stepper linear="true">
+            <mat-step [completed]="isStep1Valid()" label="Perfil">
+              <form [formGroup]="profileForm" class="step-content">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nombre(s)</mat-label>
+                  <input matInput formControlName="nombre" required>
+                  <mat-error *ngIf="profileForm.get('nombre')?.hasError('pattern')">
+                    Solo se permiten letras.
+                  </mat-error>
+                  <mat-error *ngIf="profileForm.get('nombre')?.hasError('required')">
+                    El nombre es obligatorio.
+                  </mat-error>
+                  <mat-error *ngIf="profileForm.get('nombre')?.hasError('maxlength')">
+                    Máximo 50 caracteres permitidos.
+                  </mat-error>
+                </mat-form-field>
+
+                <div class="row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Apellido Paterno</mat-label>
+                    <input matInput formControlName="apellidoPaterno" required>
+                    <mat-error *ngIf="profileForm.get('apellidoPaterno')?.hasError('pattern')">
+                      Solo se permiten letras.
+                    </mat-error>
+                    <mat-error *ngIf="profileForm.get('apellidoPaterno')?.hasError('maxlength')">
+                      Máximo 50 caracteres permitidos.
+                    </mat-error>
+                  </mat-form-field>
+                  
+                  <mat-form-field appearance="outline">
+                    <mat-label>Apellido Materno</mat-label>
+                    <input matInput formControlName="apellidoMaterno">
+                    <mat-error *ngIf="profileForm.get('apellidoMaterno')?.hasError('pattern')">
+                      Solo se permiten letras.
+                    </mat-error>
+                    <mat-error *ngIf="profileForm.get('apellidoMaterno')?.hasError('maxlength')">
+                      Máximo 50 caracteres permitidos.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Dirección</mat-label>
+                  <input matInput formControlName="direccion" required>
+                  <mat-error>La dirección es obligatoria.</mat-error>
+                  <mat-error *ngIf="profileForm.get('direccion')?.hasError('maxlength')">
+                      Máximo 100 caracteres permitidos.
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Teléfono</mat-label>
+                  <input matInput formControlName="telefono" maxlength="10" required>
+                  <mat-hint>10 dígitos numéricos</mat-hint>
+                  <mat-error *ngIf="profileForm.get('telefono')?.hasError('pattern')">
+                    Formato inválido (deben ser 10 números).
+                  </mat-error>
+                </mat-form-field>
+
+                <div class="actions">
+                  <button mat-flat-button color="primary" matStepperNext [disabled]="profileForm.invalid">
+                    SIGUIENTE
+                  </button>
+                </div>
+              </form>
+            </mat-step>
+
+            <mat-step label="Seguridad">
+              <div class="step-content">
+                <mat-form-field appearance="outline">
+                  <mat-label>Contraseña</mat-label>
+                  <input matInput [type]="hidePassword() ? 'password' : 'text'" 
+                        [ngModel]="password()" (input)="checkPassword()" (ngModelChange)="password.set($event)" required>
+                  <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button">
+                    <mat-icon>{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                  </button>
+                </mat-form-field>
+
+                <div class="grid grid-cols-2 gap-1 text-xs mb-2 px-2">
+                  <div [class.text-green-600]="passwordRequirements.length" [class.text-gray-400]="!passwordRequirements.length" class="flex items-center gap-1">
+                    <mat-icon class="text-sm h-4 w-4">{{passwordRequirements.length ? 'check_circle' : 'radio_button_unchecked'}}</mat-icon>
+                    8-64 caracteres
+                  </div>
+                  <div [class.text-green-600]="passwordRequirements.upper" [class.text-gray-400]="!passwordRequirements.upper" class="flex items-center gap-1">
+                    <mat-icon class="text-sm h-4 w-4">{{passwordRequirements.upper ? 'check_circle' : 'radio_button_unchecked'}}</mat-icon>
+                    Una Mayúscula
+                  </div>
+                  <div [class.text-green-600]="passwordRequirements.lower" [class.text-gray-400]="!passwordRequirements.lower" class="flex items-center gap-1">
+                    <mat-icon class="text-sm h-4 w-4">{{passwordRequirements.lower ? 'check_circle' : 'radio_button_unchecked'}}</mat-icon>
+                    Una Minúscula
+                  </div>
+                  <div [class.text-green-600]="passwordRequirements.number" [class.text-gray-400]="!passwordRequirements.number" class="flex items-center gap-1">
+                    <mat-icon class="text-sm h-4 w-4">{{passwordRequirements.number ? 'check_circle' : 'radio_button_unchecked'}}</mat-icon>
+                    Un Número
+                  </div>
+                  <div [class.text-green-600]="passwordRequirements.special" [class.text-gray-400]="!passwordRequirements.special" class="flex items-center gap-1 col-span-2">
+                    <mat-icon class="text-sm h-4 w-4">{{passwordRequirements.special ? 'check_circle' : 'radio_button_unchecked'}}</mat-icon>
+                    Símbolo (@$!%*?&._-)
+                  </div>
+                </div>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Confirmar Contraseña</mat-label>
+                  <input matInput [type]="hidePassword() ? 'password' : 'text'" 
+                        [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" required>
+                </mat-form-field>
+
+                <div class="actions">
+                  <button mat-button matStepperPrevious>ATRÁS</button>
+                  <button mat-flat-button color="primary" 
+                          (click)="onFinalRegister()"
+                          [disabled]="!password() || password() !== confirmPassword()">
+                    FINALIZAR
+                  </button>
+                </div>
+              </div>
+            </mat-step>
+
+          </mat-stepper>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <mat-card class="error-card">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>Enlace no válido o expirado.</p>
+      </mat-card>
+    }
+  }
+</div>

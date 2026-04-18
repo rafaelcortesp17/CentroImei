@@ -32,8 +32,12 @@ public class SecurityConfig {
         		http.cors(withDefaults())
                 .csrf(crf -> crf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
+                //se agrega por ngrok
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/mail/**").permitAll()
+                .requestMatchers("/api/v1/webhooks/stripe/**").permitAll()
+                .requestMatchers("/api/v1/commons/**").permitAll()
                 .anyRequest().authenticated()
                         )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

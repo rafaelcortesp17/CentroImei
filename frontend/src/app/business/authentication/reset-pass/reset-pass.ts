@@ -129,10 +129,10 @@ export class ResetPass {
   }
 
   closeModal() {
-    // 1. Cerramos el modal físicamente
+    // Cerramos el modal físicamente
     this.dialogRef.close();
 
-    // 2. Opcional: Reiniciamos el step por si el componente 
+    // Opcional: Reiniciamos el step por si el componente 
     // se queda en memoria o se reutiliza
     this.step = 1; 
     this.isLoading = false;

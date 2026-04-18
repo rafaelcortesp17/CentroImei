@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, Observable, tap, throwError } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
 import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
@@ -10,21 +9,31 @@ import { isPlatformBrowser } from '@angular/common';
 })
 export class Auth {
 
-  private rolesKey = 'userRoles';
 
-  private LOGIN_URL = 'http://localhost:8080/api/v1/auth/login';
+  private rolesKey = 'userRoles';
   private tokenKey = 'authToken';
-  private REFRESH_URL = 'http://localhost:8080/api/v1/auth/refresh';
   private refreshTokenKey = 'refreshToken';
   private platformId = inject(PLATFORM_ID);
 
+  /* private readonly BASE_URL = 'https://remove-vertex-mysql-arrangement.trycloudflare.com'; */
+  private readonly BASE_URL = 'http://localhost:8080';
+
+  private LOGIN_URL = `${this.BASE_URL}/api/v1/auth/login`;
+  private REFRESH_URL = `${this.BASE_URL}/api/v1/auth/refresh`;
+
   // URLs para recuperación de contraseña
-  private MAIL_URL = 'http://localhost:8080/api/v1/mail/send';
-  private VERIFY_CODE_URL = 'http://localhost:8080/api/v1/mail/verify-code';
-  private RESET_PASS_URL = 'http://localhost:8080/api/v1/mail/reset-password';
+  private MAIL_URL = `${this.BASE_URL}/api/v1/mail/send`;
+  private VERIFY_CODE_URL = `${this.BASE_URL}/api/v1/mail/verify-code`;
+  private RESET_PASS_URL = `${this.BASE_URL}/api/v1/mail/reset-password`;
 
   //Urls para el perfil general
-  private PERFIL_GENERAL_URL = 'http://localhost:8080/api/v1/home/perfil-general';
+  private PERFIL_GENERAL_URL = `${this.BASE_URL}/api/v1/home/perfil-general`;
+
+  //Urls para el verificacion de Token Registro usuario
+  private VERIFY_TOKEN_REGISTRY_URL = `${this.BASE_URL}/api/v1/commons/verify-token`;
+  private FINALIZE_REGISTRY_URL = `${this.BASE_URL}/api/v1/commons/finalize`;
+
+  private SEND_INVITE_URL = `${this.BASE_URL}/api/v1/admin/invite`;
 
   constructor(private httpClient: HttpClient, private router: Router){}
 
@@ -40,8 +49,38 @@ export class Auth {
     return this.httpClient.put<any>(this.RESET_PASS_URL, { correo, password });
   }
 
-  login(user:string, password:string): Observable<any>{
-    return this.httpClient.post<any>(this.LOGIN_URL,{user, password}).pipe(
+  private cloudflareHeaders = new HttpHeaders({
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  });
+
+  verifyToken(token: string): Observable<any> {
+    return this.httpClient.get<any>(this.VERIFY_TOKEN_REGISTRY_URL, {params: { token: encodeURIComponent(token) },
+    headers: {
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  });
+  }
+
+  finalizeRegistration(registrationData: any): Observable<any> {
+    const headers = this.cloudflareHeaders.set('Content-Type', 'application/json');
+    console.log("Payload a enviar:", JSON.stringify(registrationData));
+    return this.httpClient.post<any>(this.FINALIZE_REGISTRY_URL, registrationData,{ 
+      headers: headers
+    });
+  }
+
+  sendInvite(data: any): Observable<any> {
+    const headers = this.cloudflareHeaders.set('Content-Type', 'application/json');
+    console.log("Payload a enviar:", JSON.stringify(data));
+    return this.httpClient.post<any>(this.SEND_INVITE_URL, data,{ 
+      headers: headers
+    });
+  }
+
+  login(email:string, password:string): Observable<any>{
+    return this.httpClient.post<any>(this.LOGIN_URL,{email, password}).pipe(
       tap(response => {
         if(response.token){
           console.log(response.token);
@@ -147,21 +186,21 @@ export class Auth {
     }
   }
 
-  getProfileInfo(username: string): Observable<any>{
-    return this.httpClient.post<any>(this.PERFIL_GENERAL_URL,{username}).pipe(
+  logout():void{
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.rolesKey);
+    this.router.navigate(['/login']);
+  }
+
+  getProfileInfo(email: string): Observable<any>{
+    return this.httpClient.post<any>(this.PERFIL_GENERAL_URL,{email}).pipe(
       tap(response => {
         if(response){
           console.log(response);
         }
       })
     )
-  }
-
-  logout():void{
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
-    localStorage.removeItem(this.rolesKey);
-    this.router.navigate(['/login']);
   }
 
 }

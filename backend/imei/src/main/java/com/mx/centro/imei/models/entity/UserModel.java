@@ -1,6 +1,5 @@
 package com.mx.centro.imei.models.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,8 +22,6 @@ public class UserModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // Para que Postgres maneje el ID serial
 	private Long id;
 	private String email;
-	@Column(name="username")
-	private String name;
 	@Column(name="pass")
 	private String password;
 	@Column(name = "estatus")
@@ -36,4 +33,7 @@ public class UserModel {
 	
 	@OneToOne(mappedBy = "user")
 	private RecoveryPass recoverysPass;
+	
+	@OneToOne(mappedBy = "userRelPersonas")
+	private Personas personas;
 }

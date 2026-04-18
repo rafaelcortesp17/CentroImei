@@ -33,5 +33,8 @@ public class PasswordTokenScheduler {
 			log.error("Error al limpiar códigos expirados: {}", e.getMessage());
 		}
 	}
+	
+	//para borrar los token que serviran para el registro de usuario
+//	tokenRepository.deleteByExpiryDateBeforeOrUsedTrue(LocalDateTime.now());
 
 }

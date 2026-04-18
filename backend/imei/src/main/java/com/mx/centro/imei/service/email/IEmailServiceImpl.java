@@ -55,7 +55,7 @@ public class IEmailServiceImpl implements IEmailService{
 	    backoff = @Backoff(delay = 2000, multiplier = 2)
 	)
 	@Override
-	public void enviarCodigoRecuperacion(String destino, String codigo) {
+	public void enviarCodigoRecuperacion(String destino, String codigo,String tipo) {
 	  SimpleMailMessage message = new SimpleMailMessage();
       message.setTo(destino);
       message.setSubject("Código de Recuperación de Contraseña");
@@ -65,16 +65,33 @@ public class IEmailServiceImpl implements IEmailService{
       log.info("Correo enviado exitosamente a: {}", destino);
 	}
 	
+	@Async
+	@Retryable(
+	    value = { MailException.class }, 
+	    maxAttempts = 3, 
+	    backoff = @Backoff(delay = 2000, multiplier = 2)
+	)
+	@Override
+	public void sendActivationEmail(String destino, String activationUrl, String tipo) {
+	  SimpleMailMessage message = new SimpleMailMessage();
+      message.setTo(destino);
+      message.setSubject("Enlace para Registro de Usuario");
+      message.setText("Da click en el siguiente enlace para comenzar con tu registro: " + activationUrl);
+      
+      mailSender.send(message);
+      log.info("Correo enviado exitosamente a: {}", destino);
+	}
+	
 	@Recover
-	public void recover(MailException e, String destino, String codigo) {
+	public void recover(MailException e, String destino, String codigo, String tipo) {
 	    // Logueamos para el equipo de soporte
-	    log.error("Sistema de correos caído tras 3 intentos. Causa: {}", e.getMessage());
+	    log.error("Sistema de correos caído tras 3 intentos. Causa: {}, Tipo: {}", e.getMessage(), tipo);
 	    
 	 // Ejemplo: Guardar en DB para reintentar manualmente después
 	    ErrorLog error = new ErrorLog();
 	    error.setDestinatario(destino);
 	    error.setMotivo(e.getMessage());
-	    error.setTipo("RECUPERACION_PASSWORD");
+	    error.setTipo(tipo);
 	    error.setFecha(LocalDateTime.now());
 	    
 	    iErroresDao.save(error);

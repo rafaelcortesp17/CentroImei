@@ -1,0 +1,199 @@
+// registration.component.scss
+
+$unicep-dark:   #242e4c;
+$unicep-orange: #fe654b;
+$unicep-light:  #f8fafc;
+
+// ─── Contenedor ───────────────────────────────────────────────
+.registration-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef2f7 0%, #dce6f0 100%);
+  padding: 20px;
+}
+
+// ─── Card principal ────────────────────────────────────────────
+.registration-card {
+  width: 100%;
+  max-width: 580px;
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(36, 46, 76, 0.18) !important;
+
+  // ── Header ──
+  mat-card-header {
+    background-color: $unicep-dark;
+    padding: 28px 24px 24px !important;
+    margin: 0 !important;               // mat-card tiene margin negativo por defecto
+    border-bottom: 4px solid $unicep-orange;
+    align-items: center;
+
+    // Avatar circular con color naranja
+    .header-image {
+      width: 46px !important;
+      height: 46px !important;
+      border-radius: 50%;
+      background-color: $unicep-orange;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 3L1 9l11 6 9-4.91V17h2V9L12 3zm-1 12.99L5 12.5v3.26L12 19l7-3.24V12.5l-6 3.49z'/%3E%3C/svg%3E");
+      background-size: 26px 26px;
+      background-repeat: no-repeat;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    // ── Títulos: cubrimos tanto la API antigua como la nueva de Material ──
+    // Material 14 y anteriores
+    ::ng-deep .mat-card-title,
+    ::ng-deep .mat-mdc-card-title {
+      color: #ffffff !important;
+      font-size: 1.05rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 4px !important;
+      line-height: 1.3 !important;
+    }
+
+    ::ng-deep .mat-card-subtitle,
+    ::ng-deep .mat-mdc-card-subtitle {
+      color: $unicep-orange !important;
+      font-weight: 600 !important;
+      font-size: 0.78rem !important;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-top: 0 !important;
+    }
+  }
+
+  // El mat-card-content no necesita margen negativo si el header ya está bien
+  mat-card-content {
+    padding: 24px 20px 20px !important;
+  }
+}
+
+// ─── Error card ────────────────────────────────────────────────
+.error-card {
+  padding: 40px;
+  text-align: center;
+  border-radius: 16px !important;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+// ─── Stepper ───────────────────────────────────────────────────
+::ng-deep {
+
+  // Ícono del paso activo/completado → naranja
+  .mat-step-header {
+    .mat-step-icon-selected,
+    .mat-step-icon-state-edit,
+    .mat-step-icon-state-done {
+      background-color: $unicep-orange !important;
+      color: #fff !important;
+    }
+
+    // Paso no visitado → azul marino suave
+    .mat-step-icon:not(.mat-step-icon-selected):not(.mat-step-icon-state-edit) {
+      background-color: rgba($unicep-dark, 0.25) !important;
+      color: $unicep-dark !important;
+    }
+
+    // Label del paso activo
+    &.mat-step-header-selected .mat-step-label {
+      color: $unicep-dark !important;
+      font-weight: 600;
+    }
+  }
+
+  // Línea del stepper
+  .mat-stepper-horizontal-line {
+    border-top-color: rgba($unicep-dark, 0.2) !important;
+  }
+
+  // ─── Form fields con foco azul marino ──
+  .mat-form-field.mat-focused,
+  .mat-mdc-form-field.mat-focused {
+    .mat-form-field-label,
+    .mat-mdc-floating-label {
+      color: $unicep-dark !important;
+    }
+
+    .mat-form-field-outline-thick,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: $unicep-dark !important;
+    }
+  }
+
+  // ─── Botón Primary (mat-flat-button color="primary") ──
+  .mat-flat-button.mat-primary,
+  .mat-mdc-unelevated-button.mat-primary {
+    background-color: $unicep-dark !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    transition: background-color 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: $unicep-orange !important;
+    }
+
+    &:disabled {
+      background-color: rgba($unicep-dark, 0.35) !important;
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+  }
+
+  // ─── Botón stroked "ATRÁS" ──
+  .mat-button,
+  .mat-mdc-button {
+    color: $unicep-dark !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+  }
+}
+
+// ─── Layout de pasos ───────────────────────────────────────────
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0 4px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+// Fuerza el borde rojo en mat-form-field cuando aplicamos la clase manualmente
+::ng-deep .mat-form-field-invalid {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #f44336 !important;
+  }
+  .mat-mdc-floating-label {
+    color: #f44336 !important;
+  }
+}

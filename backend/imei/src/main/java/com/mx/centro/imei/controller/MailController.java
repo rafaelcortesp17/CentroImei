@@ -41,7 +41,8 @@ public class MailController {
 			RecoveryPass recoverySave = iEmailService.saveCode(recovery);
 			if(recoverySave != null) {
 				System.out.println("Comienza con el envio de correo..");
-				iEmailService.enviarCodigoRecuperacion(mailRequestDto.getCorreo(), code);
+				String tipo = "RECUPERACION_PASSWORD";
+				iEmailService.enviarCodigoRecuperacion(mailRequestDto.getCorreo(), code,tipo);
 				return ResponseEntity.ok(Map.of("message", "Correo enviado con éxito"));
 			}
 			return new ResponseEntity<>("No se pudo procesar la solicitud", HttpStatus.CONFLICT);

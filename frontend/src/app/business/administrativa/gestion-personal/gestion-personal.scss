@@ -1,0 +1,32 @@
+@use "styles" as global;
+
+::ng-deep {
+  @include global.shared-card-styles;
+}
+
+// Ajustes específicos para esta vista
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0 4px; // Un poco más de aire ya que no hay stepper
+  
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+// Estilo para el icono dentro del input/select para que no compita con el naranja
+::ng-deep {
+  .mat-form-field-suffix {
+    mat-icon {
+      color: rgba(global.$unicep-dark, 0.5);
+    }
+  }
+
+  // Asegurar que el select enfocado use el azul marino institucional
+  .mat-mdc-select-arrow {
+    color: global.$unicep-dark !important;
+  }
+}

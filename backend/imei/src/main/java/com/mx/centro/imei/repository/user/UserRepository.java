@@ -8,9 +8,10 @@ import com.mx.centro.imei.models.entity.UserModel;
 
 public interface UserRepository extends JpaRepository<UserModel,Long>{
 	
-	public UserModel findByname(String user);
-	
-	@Query("SELECT usuario FROM UserModel usuario JOIN FETCH usuario.rol WHERE usuario.name = :name AND usuario.estatus = 1")
-	public UserModel findByUsuarioConRol(@Param("name") String name);
+	@Query("SELECT usuario FROM UserModel usuario "
+			+ "JOIN FETCH usuario.rol "
+			+ "JOIN FETCH usuario.personas "
+			+ "WHERE usuario.email = :email AND usuario.estatus = 1")
+	public UserModel findByEmailConRol(@Param("email") String email);
 	
 }

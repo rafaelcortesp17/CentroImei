@@ -2,10 +2,11 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth-guard';
 import { AuthenticatedGuard } from './core/guards/authenticated-guard';
 import { roleGuard } from './core/guards/role-guard';
+import { CompleteRegistration } from './components/complete-registration/complete-registration';
 
 export const routes: Routes = [
     {
-        path: '',
+        path: 'platform',
         loadComponent: () => import('./shared/components/layout/layout'),
         children: [
             {
@@ -28,6 +29,12 @@ export const routes: Routes = [
             {
                 path:'control-grupos',
                 loadComponent: () => import('./business/administrativa/control-grupos/control-grupos'),
+                canActivate: [AuthGuard, roleGuard],
+                data: { expectedRole: 'ROLE_ADMIN' }
+            },
+            {
+                path:'gestion-personal',
+                loadComponent: () => import('./business/administrativa/gestion-personal/gestion-personal'),
                 canActivate: [AuthGuard, roleGuard],
                 data: { expectedRole: 'ROLE_ADMIN' }
             },
@@ -80,13 +87,16 @@ export const routes: Routes = [
         canActivate: [AuthenticatedGuard]
     },
     {
+        path:'complete-registration',component: CompleteRegistration
+    },
+    {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'platform/dashboard',
         pathMatch: 'full'
     },
     {
         path: '**',
-        redirectTo: 'dashboard'
+        redirectTo: 'platform/dashboard'
     }
 
 ];

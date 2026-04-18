@@ -10,7 +10,8 @@ public class AuthResponseDto {
 	
 	String token;
 	String refreshToken;
-	private String username;
+	private String email;
+	private String nombreUsuario;
     private List<String> roles;
 
 }

@@ -11,7 +11,9 @@ import {join} from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const angularApp = new AngularNodeAppEngine({
+  allowedHosts: ['192.168.1.83', 'localhost', '127.0.0.1']
+});
 
 app.set('view engine', 'html');
 app.set('views', browserDistFolder);
@@ -43,6 +45,9 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
+
+  req.headers['x-forwarded-host'] = req.headers.host;
+
   angularApp
     .handle(req)
     .then((response) =>

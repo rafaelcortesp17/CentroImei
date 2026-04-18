@@ -21,13 +21,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	private UserRepository userRepository;
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		
 		System.out.println("implementa UserDetailsService");
 		
-		UserModel userModel = this.userRepository.findByUsuarioConRol(username);
+		UserModel userModel = this.userRepository.findByEmailConRol(email);
 		if(userModel == null) {
-            throw  new UsernameNotFoundException("Usuario no encontrado: " + username);
+            throw  new UsernameNotFoundException("Usuario no encontrado: " + email);
         }
 		
 		// Creamos la autoridad con el prefijo ROLE_
@@ -36,7 +36,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // Devolvemos el User de Spring con su rol cargado
         return org.springframework.security.core.userdetails.User.builder()
-                .username(userModel.getName())
+                .username(userModel.getEmail())
                 .password(userModel.getPassword())
                 .authorities(List.of(authority))
                 .build();
